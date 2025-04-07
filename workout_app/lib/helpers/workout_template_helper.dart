@@ -7,7 +7,7 @@ import 'package:uuid/uuid.dart';
 // author: Berke Poslu
 // date: 2025-04-07
 // version: 1.0.0
-// description: this helper is used to save, load, and delete workout templates
+// this helper is used to save, load, and delete workout templates
 // it also has a method to generate a unique id for a workout template
 
 class WorkoutTemplateHelper {

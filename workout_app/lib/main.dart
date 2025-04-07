@@ -1,32 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'dart:async';
-import 'WorkoutApp.dart';
+import 'services/auth_service.dart';
+import 'providers/theme_provider.dart';
+import 'pages/login_screen.dart';
+import 'pages/homescreen.dart';
 
-void main() {
-  // error catching
-  runZonedGuarded(
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
+Future<void> main() async {
+  // Ensure Flutter is initialized ai generated
+  WidgetsFlutterBinding.ensureInitialized();
 
-      // more performace stuff
-      SystemChrome.setEnabledSystemUIMode(
-        SystemUiMode.manual,
-        overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
-      );
+  // Set preferred orientations
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
-      // orientation
-      SystemChrome.setPreferredOrientations([
-        DeviceOrientation.portraitUp,
-        DeviceOrientation.portraitDown,
-      ]);
-
-      // performace optimizations
-      runApp(const WorkoutApp());
-    },
-    (error, stackTrace) {
-      print('Unhandled error: $error');
-      print('Stack trace: $stackTrace');
-    },
+  // Set system UI mode ai generated
+  await SystemChrome.setEnabledSystemUIMode(
+    SystemUiMode.edgeToEdge,
+    overlays: [SystemUiOverlay.top, SystemUiOverlay.bottom],
   );
+
+  // Run app in error zone AI generated
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthService()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
+      child: Consumer2<AuthService, ThemeProvider>(
+        builder: (context, authService, themeProvider, _) {
+          return MaterialApp(
+            title: authService.isAuthenticated && authService.username != null
+                ? 'Hello ${authService.username}'
+                : 'Hello User', // defaukt state got it from stackoverflow
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+              useMaterial3: true,
+              brightness:
+                  themeProvider.isDarkMode ? Brightness.dark : Brightness.light,
+            ),
+            home: authService.isAuthenticated
+                ? HomeScreen(
+                    toggleTheme: themeProvider.toggleTheme,
+                    isDarkMode: themeProvider.isDarkMode,
+                  )
+                : const LoginScreen(),
+          );
+        },
+      ),
+    );
+  }
 }

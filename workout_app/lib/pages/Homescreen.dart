@@ -20,6 +20,11 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import '../widgets/bmi_calculator_dialog.dart';
 import '../widgets/workout_gallery.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
+import 'package:fl_chart/fl_chart.dart';
+import '../helpers/steps_persistence_helper.dart';
+import '../models/daily_steps.dart';
 
 class HomeScreen extends StatefulWidget {
   final VoidCallback toggleTheme;
@@ -43,12 +48,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   String _status = 'Initializing...';
   bool _isMockMode = false;
   bool _isDisposed = false;
+  List<DailySteps> _weeklySteps = [];
+  bool _isLoadingWeeklyData = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initializeHelpers();
+    _loadWeeklySteps();
   }
 
   @override
@@ -169,6 +177,30 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  Future<void> _loadWeeklySteps() async {
+    if (!mounted) return;
+    setState(() => _isLoadingWeeklyData = true);
+
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      if (authService.userId != null) {
+        final steps =
+            await StepsPersistenceHelper.getWeeklySteps(authService.userId!);
+        if (mounted) {
+          setState(() {
+            _weeklySteps = steps;
+            _isLoadingWeeklyData = false;
+          });
+        }
+      }
+    } catch (e) {
+      print('Error loading weekly steps: $e');
+      if (mounted) {
+        setState(() => _isLoadingWeeklyData = false);
+      }
+    }
+  }
+
   void _openGallery() {
     Navigator.push(
       context,
@@ -185,24 +217,105 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  Widget _buildWeeklyChart() {
+    if (_isLoadingWeeklyData) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_weeklySteps.isEmpty) {
+      return const Center(
+        child: Text('No steps data available for this week'),
+      );
+    }
+
+    return SizedBox(
+      height: 200,
+      child: BarChart(
+        BarChartData(
+          alignment: BarChartAlignment.spaceAround,
+          maxY: _weeklySteps
+                  .map((e) => e.steps.toDouble())
+                  .reduce((a, b) => a > b ? a : b) *
+              1.2,
+          barGroups: _weeklySteps.asMap().entries.map((entry) {
+            final day = entry.value.date.weekday;
+            final steps = entry.value.steps;
+            return BarChartGroupData(
+              x: day,
+              barRods: [
+                BarChartRodData(
+                  toY: steps.toDouble(),
+                  color: Theme.of(context).primaryColor,
+                  width: 20,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ],
+            );
+          }).toList(),
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  const days = [
+                    'Mon',
+                    'Tue',
+                    'Wed',
+                    'Thu',
+                    'Fri',
+                    'Sat',
+                    'Sun'
+                  ];
+                  return Text(days[value.toInt() - 1]);
+                },
+              ),
+            ),
+            leftTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                reservedSize: 40,
+              ),
+            ),
+            rightTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+          ),
+          gridData: FlGridData(show: false),
+          borderData: FlBorderData(show: false),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isDisposed) {
       return const SizedBox.shrink();
     }
 
-    return WillPopScope(
-      onWillPop: () async {
+    return PopScope(
+      canPop: true,
+      onPopInvoked: (didPop) {
         if (!_isDisposed && mounted) {
           _safeSetState(() {});
         }
-        return true;
       },
       child: Scaffold(
         backgroundColor: Colors.transparent,
         extendBodyBehindAppBar: false,
         appBar: AppBar(
-          title: const Text('Workout App', style: TextStyle(fontSize: 24)),
+          title: Consumer<AuthService>(
+            builder: (context, authService, _) => Text(
+              authService.username != null
+                  ? 'Hello ${authService.username}'
+                  : 'Hello User',
+              style: const TextStyle(fontSize: 24),
+            ),
+          ),
           elevation: 0,
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           actions: [
@@ -230,6 +343,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         const SizedBox(height: 16),
                         _buildStatusCard(),
                         const SizedBox(height: 16),
+                        _buildWeeklyChart(),
+                        const SizedBox(height: 16),
                         _buildWorkoutPlanCard(),
                       ],
                     ),
@@ -241,7 +356,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     color: Theme.of(context).cardColor,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
+                        color:
+                            const Color.fromRGBO(0, 0, 0, 0.1), // stackoverflow
                         blurRadius: 4,
                         offset: const Offset(0, -2),
                       ),

@@ -2,6 +2,7 @@ import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 import 'dart:isolate';
+import 'steps_persistence_helper.dart';
 
 // AI generated Error Handling
 // Pedometer Helper class
@@ -34,12 +35,15 @@ class PedometerHelper {
 
   Future<void> initialize() async {
     try {
+      _steps = await StepsPersistenceHelper.getCurrentSteps();
+      _stepController.add(_steps);
+
       final status = await Permission.activityRecognition.request();
       if (status.isGranted) {
         await _initPedometer();
       } else {
         _updateStatus('Please grant activity recognition permission');
-        _startMockStepCounter(); // Fall back to mock mode if permission denied
+        _startMockStepCounter();
       }
     } catch (e) {
       print('Error in initialize: $e');
@@ -170,6 +174,7 @@ class PedometerHelper {
     try {
       _steps = newSteps;
       _stepController.add(_steps);
+      StepsPersistenceHelper.saveCurrentSteps(_steps);
     } catch (e) {
       print('Error in _updateSteps: $e');
     }

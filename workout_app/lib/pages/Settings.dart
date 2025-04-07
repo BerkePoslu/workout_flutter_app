@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import '../helpers/settings_helper.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
+import 'login_screen.dart';
 
 class Settings extends StatefulWidget {
   final VoidCallback toggleTheme;
@@ -75,12 +78,27 @@ class _SettingsState extends State<Settings> {
   }
 
   Future<void> _toggleTheme() async {
+    if (!mounted) return;
     try {
       await SettingsHelper.setDarkMode(!widget.isDarkMode);
-      widget.toggleTheme();
+      if (mounted) {
+        widget.toggleTheme();
+      }
     } catch (e) {
-      print('Error toggling theme: $e');
+      if (mounted) {
+        print('Error toggling theme: $e');
+      }
     }
+  }
+
+  Future<void> _handleLogout() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    await authService.logout();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+      (route) => false,
+    );
   }
 
   @override
@@ -146,6 +164,20 @@ class _SettingsState extends State<Settings> {
               decoration: const InputDecoration(
                 labelText: 'Height (cm)',
                 border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 32),
+            Center(
+              child: ElevatedButton.icon(
+                onPressed: _handleLogout,
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                ),
               ),
             ),
           ],
