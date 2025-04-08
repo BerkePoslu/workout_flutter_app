@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'homescreen.dart';
+import 'package:provider/provider.dart';
+import 'package:workout_app/services/auth_service.dart';
+import 'package:workout_app/providers/theme_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -20,12 +22,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
   bool _isDarkMode = false;
 
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
-  }
-
+  // AI generated method
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -33,7 +30,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.69.4.17:8080/api/auth/register'),
+        Uri.parse(
+            'https://workout-app-backend-delta.vercel.app/api/auth/register'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text,
@@ -44,20 +42,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (response.statusCode == 201) {
         final data = json.decode(response.body);
-        // Store the token
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', data['token']);
-        await prefs.setString('userId', data['user']['id']);
+        // Store auth data
+        final authService = Provider.of<AuthService>(context, listen: false);
+        await authService.saveAuthData(
+          token: data['token'],
+          userId: data['user']['id'],
+          username: data['user']['name'],
+        );
 
         if (!mounted) return;
-        // Navigate to home screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-              builder: (context) => HomeScreen(
-                    toggleTheme: _toggleTheme,
-                    isDarkMode: _isDarkMode,
-                  )),
-        );
+        // AI generated
+        // Use named route navigation to be consistent with login page
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/home', (route) => false);
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
@@ -101,13 +98,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(
-                    labelText: 'E-Mail',
+                    labelText: 'Username',
                     border: OutlineInputBorder(),
                   ),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
+                      return 'Please enter your username';
                     }
                     return null;
                   },

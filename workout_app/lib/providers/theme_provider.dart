@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
+// AI generated class
 class ThemeProvider extends ChangeNotifier {
   bool _isDarkMode = false;
 

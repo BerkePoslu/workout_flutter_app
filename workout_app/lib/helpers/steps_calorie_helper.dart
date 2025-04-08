@@ -13,10 +13,9 @@ class StepsCalorieHelper {
   double calculateCaloriesBurned(int steps) {
     try {
       // precalculated factor for better performance got the idea from stackoverflow
-      return steps * _calorieFactor;
+      return double.parse((steps * _calorieFactor).toStringAsFixed(1));
     } catch (e) {
-      print('Error calculating calories: $e');
-      return 0.0; // Return 0 if calculation fails
+      return 0;
     }
   }
 }

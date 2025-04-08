@@ -189,6 +189,15 @@ class PedometerHelper {
     }
   }
 
+  // AI generated - Add method to reset step count
+  void resetSteps() {
+    try {
+      _updateSteps(0);
+    } catch (e) {
+      // Error in resetSteps (removed print statement)
+    }
+  }
+
   void dispose() {
     try {
       _mockStepTimer?.cancel();

@@ -18,7 +18,6 @@ class SettingsHelper {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getDouble(_weightKey) ?? _defaultWeight;
     } catch (e) {
-      print('Error getting weight: $e');
       return _defaultWeight;
     }
   }
@@ -28,7 +27,7 @@ class SettingsHelper {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble(_weightKey, weight);
     } catch (e) {
-      print('Error saving weight: $e');
+      rethrow;
     }
   }
 
@@ -37,7 +36,6 @@ class SettingsHelper {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getDouble(_heightKey) ?? _defaultHeight;
     } catch (e) {
-      print('Error getting height: $e');
       return _defaultHeight;
     }
   }
@@ -47,7 +45,7 @@ class SettingsHelper {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setDouble(_heightKey, height);
     } catch (e) {
-      print('Error saving height: $e');
+      rethrow;
     }
   }
 
@@ -56,7 +54,6 @@ class SettingsHelper {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getBool(_darkModeKey) ?? _defaultDarkMode;
     } catch (e) {
-      print('Error getting dark mode: $e');
       return _defaultDarkMode;
     }
   }
@@ -66,7 +63,7 @@ class SettingsHelper {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_darkModeKey, isDarkMode);
     } catch (e) {
-      print('Error saving dark mode: $e');
+      rethrow;
     }
   }
 }

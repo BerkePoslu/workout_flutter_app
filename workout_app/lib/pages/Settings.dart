@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../helpers/settings_helper.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
-import 'login_screen.dart';
+import 'Login.dart';
 
 class Settings extends StatefulWidget {
   final VoidCallback toggleTheme;
@@ -24,6 +24,8 @@ class _SettingsState extends State<Settings> {
   final _weightController = TextEditingController();
   final _heightController = TextEditingController();
   bool _isLoading = true;
+  final _formKey = GlobalKey<FormState>();
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -44,7 +46,6 @@ class _SettingsState extends State<Settings> {
         });
       }
     } catch (e) {
-      print('Error loading settings: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -68,7 +69,6 @@ class _SettingsState extends State<Settings> {
         widget.onWeightChanged?.call();
       }
     } catch (e) {
-      print('Error saving settings: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Error saving settings')),
@@ -86,7 +86,7 @@ class _SettingsState extends State<Settings> {
       }
     } catch (e) {
       if (mounted) {
-        print('Error toggling theme: $e');
+        // Handle error
       }
     }
   }

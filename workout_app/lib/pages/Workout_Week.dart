@@ -30,7 +30,6 @@ class _WorkoutWeekState extends State<WorkoutWeek> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading week schedule: $e');
       setState(() {
         _isLoading = false;
       });

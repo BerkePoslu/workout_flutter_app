@@ -3,7 +3,6 @@ import '../pages/workout_week.dart';
 import '../pages/Homescreen.dart';
 import '../pages/Workout_Template.dart';
 import '../models/workout_template.dart';
-import '../models/week.dart';
 
 // Navigation Helper class
 // Author: Berke Poslu

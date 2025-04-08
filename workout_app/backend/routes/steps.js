@@ -49,4 +49,28 @@ router.post("/daily", async (req, res) => {
   }
 });
 
+router.post("/daily/sample", async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const stepData = req.body;
+
+    // Handle both single record and array of records
+    const records = Array.isArray(stepData) ? stepData : [stepData];
+
+    const results = await Promise.all(
+      records.map(async (record) => {
+        const date = new Date(record.date);
+        return await Step.findOneAndUpdate(
+          { userId, date },
+          { steps: record.steps },
+          { upsert: true, new: true }
+        );
+      })
+    );
+
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
 module.exports = router;

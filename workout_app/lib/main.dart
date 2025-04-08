@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'dart:async';
 import 'services/auth_service.dart';
 import 'providers/theme_provider.dart';
-import 'pages/login_screen.dart';
+import 'pages/Login.dart';
 import 'pages/homescreen.dart';
 
 Future<void> main() async {
@@ -42,19 +42,24 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: authService.isAuthenticated && authService.username != null
                 ? 'Hello ${authService.username}'
-                : 'Hello User', // defaukt state got it from stackoverflow
+                : 'Hello User', // default state got it from stackoverflow
             theme: ThemeData(
               primarySwatch: Colors.blue,
+              // material 3 is the latest version of the Material Design specification
               useMaterial3: true,
               brightness:
                   themeProvider.isDarkMode ? Brightness.dark : Brightness.light,
             ),
-            home: authService.isAuthenticated
-                ? HomeScreen(
+            // AI generated
+            // Define routes for consistent navigation
+            initialRoute: authService.isAuthenticated ? '/home' : '/login',
+            routes: {
+              '/login': (context) => const LoginScreen(),
+              '/home': (context) => HomeScreen(
                     toggleTheme: themeProvider.toggleTheme,
                     isDarkMode: themeProvider.isDarkMode,
-                  )
-                : const LoginScreen(),
+                  ),
+            },
           );
         },
       ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/auth_service.dart';
@@ -28,8 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final response = await http.post(
-        Uri.parse(
-            'https://workout-app-backend-delta.vercel.app/api/auth/login'),
+        Uri.parse('http://10.69.4.17:8080/api/auth/login'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
           'email': _emailController.text,
@@ -44,9 +42,8 @@ class _LoginScreenState extends State<LoginScreen> {
         // Store auth data
         final authService = Provider.of<AuthService>(context, listen: false);
         await authService.login(
-          token: data['token'],
-          userId: data['user']['id'],
-          username: data['user']['name'],
+          _emailController.text,
+          _passwordController.text,
         );
 
         if (!mounted) return;
@@ -70,15 +67,13 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (!mounted) return;
-      print('Login error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Connection error: $e'),
-          backgroundColor: Colors.red,
-        ),
+        const SnackBar(content: Text('Connection error')),
       );
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 

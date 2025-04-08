@@ -6,6 +6,13 @@ import '../models/daily_steps.dart';
 class StepsPersistenceHelper {
   static const String _stepsKey = 'current_steps';
   static const String _lastSavedDateKey = 'last_saved_date';
+  static http.Client? _client;
+
+  static set httpClient(http.Client client) {
+    _client = client;
+  }
+
+  static http.Client get _httpClient => _client ?? http.Client();
 
   static Future<void> saveCurrentSteps(int steps) async {
     final prefs = await SharedPreferences.getInstance();
@@ -29,7 +36,7 @@ class StepsPersistenceHelper {
 
   static Future<void> saveToDatabase(String userId, int steps) async {
     try {
-      final response = await http.post(
+      final response = await _httpClient.post(
         Uri.parse('https://workout-app-backend-delta.vercel.app/api/steps'),
         headers: {
           'Content-Type': 'application/json',
@@ -48,24 +55,57 @@ class StepsPersistenceHelper {
         await prefs.setInt(_stepsKey, 0); // Reset steps after saving
       }
     } catch (e) {
-      print('Error saving steps to database: $e');
+      rethrow;
     }
   }
 
   static Future<List<DailySteps>> getWeeklySteps(String userId) async {
+    print('1. Starting getWeeklySteps with userId: $userId');
     try {
-      final response = await http.get(
+      print('2. Getting token from SharedPreferences');
+      final token = await SharedPreferences.getInstance()
+          .then((prefs) => prefs.getString('token'));
+      print('3. Token retrieved: ${token != null ? 'exists' : 'null'}');
+
+      print('4. Making HTTP request to weekly steps endpoint');
+      final response = await _httpClient.get(
         Uri.parse(
-            'https://workout-app-backend-delta.vercel.app/api/steps/weekly?userId=$userId'),
+            'https://workout-app-backend-delta.vercel.app/api/steps/weekly'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token'
+        },
       );
 
+      print('5. Response status code: ${response.statusCode}');
+      print('6. Raw response body: ${response.body}');
+
       if (response.statusCode == 200) {
+        print('7. Parsing response data');
         final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => DailySteps.fromJson(json)).toList();
+        print('8. Parsed data length: ${data.length}');
+
+        // Print each item's structure
+        for (var i = 0; i < data.length; i++) {
+          print('Item $i: ${data[i]}');
+        }
+
+        return data.map((json) {
+          try {
+            return DailySteps.fromJson(json);
+          } catch (e) {
+            print('Error parsing item: $json');
+            print('Error details: $e');
+            rethrow;
+          }
+        }).toList();
       }
+      print(
+          '9. Failed to get weekly steps. Status code: ${response.statusCode}');
       return [];
-    } catch (e) {
-      print('Error fetching weekly steps: $e');
+    } catch (e, stackTrace) {
+      print('10. Error in getWeeklySteps: $e');
+      print('11. Stack trace: $stackTrace');
       return [];
     }
   }

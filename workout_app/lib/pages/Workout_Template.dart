@@ -49,7 +49,6 @@ class _WorkoutTemplateScreenState extends State<WorkoutTemplateScreen> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading template: $e');
       setState(() {
         _currentTemplate = template;
         _isLoading = false;
@@ -67,7 +66,6 @@ class _WorkoutTemplateScreenState extends State<WorkoutTemplateScreen> {
         });
       }
     } catch (e) {
-      print('Error loading templates: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;

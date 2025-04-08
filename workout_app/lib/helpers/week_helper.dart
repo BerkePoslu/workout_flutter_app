@@ -36,8 +36,7 @@ class WeekHelper {
             value == null ? null : Week.fromJson(value as Map<String, dynamic>),
           ));
     } catch (e) {
-      print('Error loading week schedule: $e');
-      return _defaultWeek;
+      rethrow;
     }
   }
 
@@ -52,7 +51,7 @@ class WeekHelper {
       );
       await prefs.setString(_weekKey, weekJson);
     } catch (e) {
-      print('Error saving week schedule: $e');
+      rethrow;
     }
   }
 
@@ -91,8 +90,7 @@ class WeekHelper {
       schedule[today] = workout;
       await updateWeekSchedule(schedule);
     } catch (e) {
-      print('Error updating today\'s workout: $e');
-      throw Exception('Failed to update today\'s workout');
+      rethrow;
     }
   }
 }

@@ -45,8 +45,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   late StepsCalorieHelper _stepsCalorieHelper;
   int _steps = 0;
   double _caloriesBurned = 0.0;
-  String _status = 'Initializing...';
-  bool _isMockMode = false;
   bool _isDisposed = false;
   List<DailySteps> _weeklySteps = [];
   bool _isLoadingWeeklyData = false;
@@ -89,7 +87,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _stepsCalorieHelper = StepsCalorieHelper(weightInKg: weight);
       await _initializePedometer();
     } catch (e) {
-      print('Error initializing helpers: $e');
       _stepsCalorieHelper = StepsCalorieHelper(weightInKg: 70.0);
     }
   }
@@ -106,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         });
       }
     } catch (e) {
-      print('Error updating weight: $e');
+      // AI generated - removed print statement
     }
   }
 
@@ -127,75 +124,59 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           });
         },
         onError: (error) {
-          print('Step stream error: $error');
-          _safeSetState(() {
-            if (error.toString().contains('StepDetection not available') ||
-                error.toString().contains('StepCount not available')) {
-              _status = 'Step counter not available on this device';
-            } else {
-              _status = 'Error: $error';
-            }
-          });
+          // AI generated - removed error handling for status
         },
         cancelOnError: false,
       );
 
-      if (_isDisposed || !mounted) return;
-
-      _pedometerHelper.statusStream.listen(
-        (status) {
-          _safeSetState(() {
-            _status = status;
-            _isMockMode = _pedometerHelper.isMockMode;
-          });
-        },
-        onError: (error) {
-          print('Status stream error: $error');
-          _safeSetState(() {
-            if (error.toString().contains('StepDetection not available') ||
-                error.toString().contains('StepCount not available')) {
-              _status = 'Step counter not available on this device';
-            } else {
-              _status = 'Error: $error';
-            }
-          });
-        },
-        cancelOnError: false,
-      );
+      // Removed status stream listener
     } catch (e) {
-      print('Error initializing pedometer: $e');
-      if (!_isDisposed && mounted) {
-        _safeSetState(() {
-          if (e.toString().contains('StepDetection not available') ||
-              e.toString().contains('StepCount not available')) {
-            _status = 'Step counter not available on this device';
-          } else {
-            _status = 'Error initializing: $e';
-          }
-        });
-      }
+      // AI generated - removed print statement and status updates
     }
   }
 
   Future<void> _loadWeeklySteps() async {
-    if (!mounted) return;
+    print('A. Starting _loadWeeklySteps');
+    if (!mounted) {
+      print('B. Not mounted, returning');
+      return;
+    }
+
+    print('C. Setting loading state to true');
     setState(() => _isLoadingWeeklyData = true);
 
     try {
+      print('D. Getting auth service');
       final authService = Provider.of<AuthService>(context, listen: false);
+      print('E. Auth service user ID: ${authService.userId}');
+
       if (authService.userId != null) {
+        print('F. User ID exists, fetching weekly steps');
         final steps =
             await StepsPersistenceHelper.getWeeklySteps(authService.userId!);
+        print('G. Got steps data, length: ${steps.length}');
+
         if (mounted) {
+          print('H. Setting state with new steps data');
           setState(() {
             _weeklySteps = steps;
             _isLoadingWeeklyData = false;
           });
+        } else {
+          print('H. Not mounted after getting steps');
+        }
+      } else {
+        print('F. No user ID available');
+        if (mounted) {
+          print('G. Setting loading state to false');
+          setState(() => _isLoadingWeeklyData = false);
         }
       }
-    } catch (e) {
-      print('Error loading weekly steps: $e');
+    } catch (e, stackTrace) {
+      print('I. Error in _loadWeeklySteps: $e');
+      print('J. Stack trace: $stackTrace');
       if (mounted) {
+        print('K. Setting loading state to false after error');
         setState(() => _isLoadingWeeklyData = false);
       }
     }
@@ -228,6 +209,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       );
     }
 
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final barColor = isDarkMode ? Colors.white : Theme.of(context).primaryColor;
+    final textColor = isDarkMode ? Colors.white : Colors.black;
+
     return SizedBox(
       height: 200,
       child: BarChart(
@@ -245,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               barRods: [
                 BarChartRodData(
                   toY: steps.toDouble(),
-                  color: Theme.of(context).primaryColor,
+                  color: barColor,
                   width: 20,
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -267,7 +252,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     'Sat',
                     'Sun'
                   ];
-                  return Text(days[value.toInt() - 1]);
+                  return Text(
+                    days[value.toInt() - 1],
+                    style: TextStyle(color: textColor),
+                  );
                 },
               ),
             ),
@@ -275,6 +263,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               sideTitles: SideTitles(
                 showTitles: true,
                 reservedSize: 40,
+                getTitlesWidget: (value, meta) {
+                  final number = value.toInt();
+                  final displayText = number >= 1000
+                      ? '${(number / 1000).toStringAsFixed(1)}k'
+                      : number.toString();
+                  return Text(
+                    displayText,
+                    style: TextStyle(color: textColor, fontSize: 12),
+                  );
+                },
               ),
             ),
             rightTitles: AxisTitles(
@@ -284,7 +282,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               sideTitles: SideTitles(showTitles: false),
             ),
           ),
-          gridData: FlGridData(show: false),
+          gridData: FlGridData(
+            show: true,
+            drawVerticalLine: false,
+            getDrawingHorizontalLine: (value) {
+              return FlLine(
+                color: isDarkMode
+                    ? Colors.white.withOpacity(0.1)
+                    : Colors.black.withOpacity(0.1),
+                strokeWidth: 1,
+              );
+            },
+          ),
           borderData: FlBorderData(show: false),
         ),
       ),
@@ -335,29 +344,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0, vertical: 16.0),
+                        horizontal: 16.0, vertical: 8.0),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
+                        const SizedBox(height: 8),
                         _buildStepsCard(),
-                        const SizedBox(height: 16),
-                        _buildStatusCard(),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
                         _buildWeeklyChart(),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 24),
                         _buildWorkoutPlanCard(),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
                   decoration: BoxDecoration(
                     color: Theme.of(context).cardColor,
                     boxShadow: [
                       BoxShadow(
-                        color:
-                            const Color.fromRGBO(0, 0, 0, 0.1), // stackoverflow
+                        color: Theme.of(context).shadowColor.withOpacity(0.1),
                         blurRadius: 4,
                         offset: const Offset(0, -2),
                       ),
@@ -389,81 +397,38 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Widget _buildStepsCard() {
     return Card(
-      elevation: 2,
+      elevation: 4,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(32),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            vertical: 24.0 * 2, horizontal: 16.0 * 6),
+        padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 32.0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
               'Steps Today',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 28,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Text(
               '$_steps',
               style: const TextStyle(
-                fontSize: 64,
+                fontSize: 72,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             Text(
               'Calories: ${_caloriesBurned.toStringAsFixed(1)}',
               style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusCard() {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(28),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            const Text(
-              'Status',
-              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              _status,
-              style: const TextStyle(
-                fontSize: 18,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            if (_isMockMode) ...[
-              const SizedBox(height: 8),
-              Text(
-                '(Mock Mode - For Testing)',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
           ],
         ),
       ),
@@ -477,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         borderRadius: BorderRadius.circular(28),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
             const Text(
@@ -487,7 +452,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               DateFormat('EEEE').format(DateTime.now()),
               style: const TextStyle(
@@ -495,7 +460,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             _buildTodaysWorkout(),
           ],
         ),

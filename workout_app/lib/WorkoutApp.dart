@@ -16,7 +16,11 @@ class _WorkoutAppState extends State<WorkoutApp> {
   @override
   void initState() {
     super.initState();
-    _loadTheme();
+    // AI generated
+    // Load theme asynchronously without blocking
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadTheme();
+    });
   }
 
   Future<void> _loadTheme() async {
@@ -29,7 +33,6 @@ class _WorkoutAppState extends State<WorkoutApp> {
         });
       }
     } catch (e) {
-      print('Error loading theme: $e');
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -39,15 +42,23 @@ class _WorkoutAppState extends State<WorkoutApp> {
   }
 
   Future<void> toggleTheme() async {
+    // AI generated
+    // Set state immediately for responsive UI
+    setState(() {
+      _isDarkMode = !_isDarkMode;
+    });
+
+    // AI generated
+    // Then save the setting in the background
     try {
-      await SettingsHelper.setDarkMode(!_isDarkMode);
+      await SettingsHelper.setDarkMode(_isDarkMode);
+    } catch (e) {
+      // Revert if saving fails
       if (mounted) {
         setState(() {
           _isDarkMode = !_isDarkMode;
         });
       }
-    } catch (e) {
-      print('Error toggling theme: $e');
     }
   }
 
@@ -71,7 +82,13 @@ class _WorkoutAppState extends State<WorkoutApp> {
         brightness: Brightness.dark,
       ),
       themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
-      home: HomeScreen(toggleTheme: toggleTheme, isDarkMode: _isDarkMode),
+      initialRoute: '/',
+      routes: {
+        '/': (context) =>
+            HomeScreen(toggleTheme: toggleTheme, isDarkMode: _isDarkMode),
+        '/home': (context) =>
+            HomeScreen(toggleTheme: toggleTheme, isDarkMode: _isDarkMode),
+      },
     );
   }
 }

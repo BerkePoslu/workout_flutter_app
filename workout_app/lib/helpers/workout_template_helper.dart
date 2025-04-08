@@ -29,7 +29,6 @@ class WorkoutTemplateHelper {
           .toList()
         ..sort((a, b) => b.lastUsed.compareTo(a.lastUsed));
     } catch (e) {
-      print('Error loading templates: $e');
       return [];
     }
   }
@@ -50,8 +49,7 @@ class WorkoutTemplateHelper {
           json.encode(templates.map((t) => t.toJson()).toList());
       await prefs.setString(_templatesKey, templatesJson);
     } catch (e) {
-      print('Error saving template: $e');
-      throw Exception('Failed to save workout template');
+      rethrow;
     }
   }
 
@@ -65,8 +63,7 @@ class WorkoutTemplateHelper {
           json.encode(templates.map((t) => t.toJson()).toList());
       await prefs.setString(_templatesKey, templatesJson);
     } catch (e) {
-      print('Error deleting template: $e');
-      throw Exception('Failed to delete workout template');
+      rethrow;
     }
   }
 
@@ -86,7 +83,7 @@ class WorkoutTemplateHelper {
         await prefs.setString(_templatesKey, templatesJson);
       }
     } catch (e) {
-      print('Error updating template last used: $e');
+      rethrow;
     }
   }
 
