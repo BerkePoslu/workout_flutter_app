@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'homescreen.dart';
 import 'package:provider/provider.dart';
 import 'package:workout_app/services/auth_service.dart';
-import 'package:workout_app/providers/theme_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -20,7 +18,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   final _nameController = TextEditingController();
   bool _isLoading = false;
-  bool _isDarkMode = false;
 
   // AI generated method
   Future<void> _register() async {
@@ -162,12 +159,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _register,
-                  child: _isLoading
-                      ? const CircularProgressIndicator()
-                      : const Text('Register'),
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                   ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator()
+                      : const Text('Register'),
                 ),
                 const SizedBox(height: 16),
                 TextButton(

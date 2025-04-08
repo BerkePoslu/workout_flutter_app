@@ -296,8 +296,8 @@ class _WorkoutWeekState extends State<WorkoutWeek> {
                 ),
               );
             },
-            child: const Text('Remove'),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Remove'),
           ),
         ],
       ),

@@ -12,7 +12,7 @@ import 'package:uuid/uuid.dart';
 
 class WorkoutTemplateHelper {
   static const String _templatesKey = 'workout_templates';
-  static final _uuid = Uuid();
+  static const _uuid = Uuid();
 
   static Future<List<WorkoutTemplate>> getAllTemplates() async {
     try {

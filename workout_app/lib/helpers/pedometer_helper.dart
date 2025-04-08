@@ -46,7 +46,6 @@ class PedometerHelper {
         _startMockStepCounter();
       }
     } catch (e) {
-      print('Error in initialize: $e');
       _updateStatus('Error initializing pedometer: $e');
       _startMockStepCounter();
     }
@@ -58,10 +57,9 @@ class PedometerHelper {
       bool isAvailable = false;
       try {
         // try to access the stream to see if its available
-        final testStream = Pedometer.stepCountStream;
-        isAvailable = testStream != null;
+        Pedometer.stepCountStream;
+        isAvailable = true;
       } catch (e) {
-        print('Pedometer availability check failed: $e');
         isAvailable = false;
       }
 
@@ -78,7 +76,6 @@ class PedometerHelper {
         _pedestrianStatusStream!.listen(
           onPedestrianStatusChanged,
           onError: (error) {
-            print('Pedestrian status error: $error');
             onPedestrianStatusError(error);
           },
           cancelOnError: false,
@@ -89,7 +86,6 @@ class PedometerHelper {
         _stepCountStream!.listen(
           onStepCount,
           onError: (error) {
-            print('Step count error: $error');
             onStepCountError(error);
           },
           cancelOnError: false,
@@ -99,7 +95,6 @@ class PedometerHelper {
         _startMockStepCounter();
       }
     } catch (e) {
-      print('Error in _initPedometer: $e');
       // check for specific error messages
       if (e.toString().contains('StepDetection not available') ||
           e.toString().contains('StepCount not available')) {
@@ -121,72 +116,46 @@ class PedometerHelper {
         try {
           _updateSteps(_steps + 2);
         } catch (e) {
-          print('Error in mock timer: $e');
           timer.cancel();
         }
       });
     } catch (e) {
-      print('Error in _startMockStepCounter: $e');
       _updateStatus('Error starting mock counter: $e');
     }
   }
 
   void onPedestrianStatusChanged(PedestrianStatus event) {
-    try {
-      _updateStatus(event.status);
-    } catch (e) {
-      print('Error in onPedestrianStatusChanged: $e');
-    }
+    _updateStatus(event.status);
   }
 
   void onPedestrianStatusError(error) {
-    try {
-      _updateStatus('Pedestrian Status not available');
-    } catch (e) {
-      print('Error in onPedestrianStatusError: $e');
-    }
+    _updateStatus('Pedestrian Status not available');
   }
 
   void onStepCount(StepCount event) {
-    try {
-      _updateSteps(event.steps);
-    } catch (e) {
-      print('Error in onStepCount: $e');
-    }
+    _updateSteps(event.steps);
   }
 
   void onStepCountError(error) {
-    try {
-      // check for specific error messages
-      if (error.toString().contains('StepDetection not available') ||
-          error.toString().contains('StepCount not available')) {
-        _updateStatus('Step counter not available on this device');
-      } else {
-        _updateStatus('Step Count not available');
-      }
-      _startMockStepCounter();
-    } catch (e) {
-      print('Error in onStepCountError: $e');
+    // check for specific error messages
+    if (error.toString().contains('StepDetection not available') ||
+        error.toString().contains('StepCount not available')) {
+      _updateStatus('Step counter not available on this device');
+    } else {
+      _updateStatus('Step Count not available');
     }
+    _startMockStepCounter();
   }
 
   void _updateSteps(int newSteps) {
-    try {
-      _steps = newSteps;
-      _stepController.add(_steps);
-      StepsPersistenceHelper.saveCurrentSteps(_steps);
-    } catch (e) {
-      print('Error in _updateSteps: $e');
-    }
+    _steps = newSteps;
+    _stepController.add(_steps);
+    StepsPersistenceHelper.saveCurrentSteps(_steps);
   }
 
   void _updateStatus(String newStatus) {
-    try {
-      _status = newStatus;
-      _statusController.add(_status);
-    } catch (e) {
-      print('Error in _updateStatus: $e');
-    }
+    _status = newStatus;
+    _statusController.add(_status);
   }
 
   // AI generated - Add method to reset step count
@@ -199,14 +168,10 @@ class PedometerHelper {
   }
 
   void dispose() {
-    try {
-      _mockStepTimer?.cancel();
-      _stepController.close();
-      _statusController.close();
-      _isolate?.kill();
-      _receivePort?.close();
-    } catch (e) {
-      print('Error in dispose: $e');
-    }
+    _mockStepTimer?.cancel();
+    _stepController.close();
+    _statusController.close();
+    _isolate?.kill();
+    _receivePort?.close();
   }
 }

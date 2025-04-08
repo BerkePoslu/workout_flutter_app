@@ -136,47 +136,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _loadWeeklySteps() async {
-    print('A. Starting _loadWeeklySteps');
-    if (!mounted) {
-      print('B. Not mounted, returning');
-      return;
-    }
+    if (!mounted) return;
 
-    print('C. Setting loading state to true');
     setState(() => _isLoadingWeeklyData = true);
 
     try {
-      print('D. Getting auth service');
       final authService = Provider.of<AuthService>(context, listen: false);
-      print('E. Auth service user ID: ${authService.userId}');
 
       if (authService.userId != null) {
-        print('F. User ID exists, fetching weekly steps');
         final steps =
             await StepsPersistenceHelper.getWeeklySteps(authService.userId!);
-        print('G. Got steps data, length: ${steps.length}');
-
         if (mounted) {
-          print('H. Setting state with new steps data');
           setState(() {
             _weeklySteps = steps;
             _isLoadingWeeklyData = false;
           });
-        } else {
-          print('H. Not mounted after getting steps');
         }
       } else {
-        print('F. No user ID available');
         if (mounted) {
-          print('G. Setting loading state to false');
           setState(() => _isLoadingWeeklyData = false);
         }
       }
-    } catch (e, stackTrace) {
-      print('I. Error in _loadWeeklySteps: $e');
-      print('J. Stack trace: $stackTrace');
+    } catch (e) {
       if (mounted) {
-        print('K. Setting loading state to false after error');
         setState(() => _isLoadingWeeklyData = false);
       }
     }
@@ -308,6 +290,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     return PopScope(
       canPop: true,
+      // AI generated - onPopInvoked
       onPopInvoked: (didPop) {
         if (!_isDisposed && mounted) {
           _safeSetState(() {});
@@ -519,7 +502,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 Navigator.pop(context);
                               }
                             } catch (e) {
-                              print('Error updating workout: $e');
+                              // Error updating workout (removed print statement)
                             }
                           }
                         },
@@ -528,7 +511,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         _safeSetState(() {});
                       }
                     } catch (e) {
-                      print('Error navigating: $e');
+                      // Error navigating (removed print statement)
                     }
                   }
                 },
@@ -560,7 +543,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         _safeSetState(() {});
                       }
                     } catch (e) {
-                      print('Error navigating to week view: $e');
+                      // Error navigating to week view (removed print statement)
                     }
                   }
                 },
@@ -587,7 +570,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   }
                   VibrationHelper.vibrate();
                 } catch (e) {
-                  print('Error navigating to week view: $e');
+                  // Error navigating to week view (removed print statement)
                 }
               }
             },
@@ -620,7 +603,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           _safeSetState(() {});
         }
       } catch (e) {
-        print('Error navigating to settings: $e');
+        // Error navigating to settings (removed print statement)
       }
     }
   }

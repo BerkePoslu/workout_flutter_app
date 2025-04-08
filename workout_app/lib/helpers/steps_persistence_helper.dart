@@ -35,78 +35,44 @@ class StepsPersistenceHelper {
   }
 
   static Future<void> saveToDatabase(String userId, int steps) async {
-    try {
-      final response = await _httpClient.post(
-        Uri.parse('https://workout-app-backend-delta.vercel.app/api/steps'),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: json.encode({
-          'userId': userId,
-          'steps': steps,
-          'date': DateTime.now().toIso8601String(),
-        }),
-      );
+    final response = await _httpClient.post(
+      Uri.parse('https://workout-app-backend-delta.vercel.app/api/steps'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'userId': userId,
+        'steps': steps,
+        'date': DateTime.now().toIso8601String(),
+      }),
+    );
 
-      if (response.statusCode == 201) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(
-            _lastSavedDateKey, DateTime.now().toIso8601String());
-        await prefs.setInt(_stepsKey, 0); // Reset steps after saving
-      }
-    } catch (e) {
-      rethrow;
+    if (response.statusCode == 201) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(
+          _lastSavedDateKey, DateTime.now().toIso8601String());
+      await prefs.setInt(_stepsKey, 0); // Reset steps after saving
     }
   }
 
   static Future<List<DailySteps>> getWeeklySteps(String userId) async {
-    print('1. Starting getWeeklySteps with userId: $userId');
-    try {
-      print('2. Getting token from SharedPreferences');
-      final token = await SharedPreferences.getInstance()
-          .then((prefs) => prefs.getString('token'));
-      print('3. Token retrieved: ${token != null ? 'exists' : 'null'}');
+    final token = await SharedPreferences.getInstance()
+        .then((prefs) => prefs.getString('token'));
 
-      print('4. Making HTTP request to weekly steps endpoint');
-      final response = await _httpClient.get(
-        Uri.parse(
-            'https://workout-app-backend-delta.vercel.app/api/steps/weekly'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token'
-        },
-      );
+    final response = await _httpClient.get(
+      Uri.parse(
+          'https://workout-app-backend-delta.vercel.app/api/steps/weekly'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token'
+      },
+    );
 
-      print('5. Response status code: ${response.statusCode}');
-      print('6. Raw response body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        print('7. Parsing response data');
-        final List<dynamic> data = json.decode(response.body);
-        print('8. Parsed data length: ${data.length}');
-
-        // Print each item's structure
-        for (var i = 0; i < data.length; i++) {
-          print('Item $i: ${data[i]}');
-        }
-
-        return data.map((json) {
-          try {
-            return DailySteps.fromJson(json);
-          } catch (e) {
-            print('Error parsing item: $json');
-            print('Error details: $e');
-            rethrow;
-          }
-        }).toList();
-      }
-      print(
-          '9. Failed to get weekly steps. Status code: ${response.statusCode}');
-      return [];
-    } catch (e, stackTrace) {
-      print('10. Error in getWeeklySteps: $e');
-      print('11. Stack trace: $stackTrace');
-      return [];
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => DailySteps.fromJson(json)).toList();
     }
+
+    return [];
   }
 }

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/workout_template.dart';
 import '../models/exercise.dart';
 import '../helpers/workout_template_helper.dart';
-import 'Exercise_Edit.dart';
-import 'package:intl/intl.dart';
 
 class WorkoutTemplateScreen extends StatefulWidget {
   final Function(WorkoutTemplate)? onTemplateSelected;
@@ -260,6 +258,7 @@ class _WorkoutTemplateScreenState extends State<WorkoutTemplateScreen> {
                 }
               } catch (e) {
                 if (mounted) {
+                  // AI generated - Show a snackbar to confirm deletion
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Failed to save exercise')),
                   );
@@ -300,8 +299,8 @@ class _WorkoutTemplateScreenState extends State<WorkoutTemplateScreen> {
               ),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(true),
-                child: const Text('Remove'),
                 style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Remove'),
               ),
             ],
           ),
@@ -328,7 +327,7 @@ class _WorkoutTemplateScreenState extends State<WorkoutTemplateScreen> {
             if (widget.onTemplateSelected != null) {
               widget.onTemplateSelected!(updatedTemplate);
             }
-            // Show a snackbar to confirm deletion
+            // Show a snackbar to confirm deletion AI generated
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('${exercise.name} removed'),
@@ -524,8 +523,8 @@ class _WorkoutTemplateScreenState extends State<WorkoutTemplateScreen> {
       floatingActionButton: _currentTemplate == null
           ? FloatingActionButton(
               onPressed: _createTemplate,
-              child: const Icon(Icons.add),
               tooltip: 'Create Workout',
+              child: const Icon(Icons.add),
             )
           : null,
     );
@@ -544,8 +543,8 @@ class _WorkoutTemplateScreenState extends State<WorkoutTemplateScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
           ),
         ],
       ),

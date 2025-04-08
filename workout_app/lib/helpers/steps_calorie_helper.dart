@@ -12,6 +12,9 @@ class StepsCalorieHelper {
 
   double calculateCaloriesBurned(int steps) {
     try {
+      // AI generated - Handle negative steps by returning 0
+      if (steps < 0) return 0.0;
+
       // precalculated factor for better performance got the idea from stackoverflow
       return double.parse((steps * _calorieFactor).toStringAsFixed(1));
     } catch (e) {

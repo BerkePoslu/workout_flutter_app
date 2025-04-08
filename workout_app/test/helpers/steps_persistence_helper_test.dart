@@ -14,6 +14,7 @@ void main() {
     setUp(() {
       // Initialize mock client
       mockClient = MockClient();
+      StepsPersistenceHelper.httpClient = mockClient;
 
       // Set up shared preferences with token
       SharedPreferences.setMockInitialValues({'token': 'test_token'});

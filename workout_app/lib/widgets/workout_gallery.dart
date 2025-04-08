@@ -60,7 +60,6 @@ class _WorkoutGalleryState extends State<WorkoutGallery> {
         });
       }
     } catch (e) {
-      print('Error loading photos: $e');
       setState(() {
         _isLoading = false;
       });
@@ -219,7 +218,7 @@ class _WorkoutGalleryState extends State<WorkoutGallery> {
                             child: Container(
                               padding: const EdgeInsets.all(4),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.5),
+                                color: Colors.black.withAlpha(128),
                                 borderRadius: const BorderRadius.only(
                                   bottomLeft: Radius.circular(8),
                                   bottomRight: Radius.circular(8),

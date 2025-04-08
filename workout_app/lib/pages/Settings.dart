@@ -24,8 +24,6 @@ class _SettingsState extends State<Settings> {
   final _weightController = TextEditingController();
   final _heightController = TextEditingController();
   bool _isLoading = true;
-  final _formKey = GlobalKey<FormState>();
-  bool _isSaving = false;
 
   @override
   void initState() {
